@@ -18,8 +18,9 @@ class BWT_Builder {
 	void build(const string& input, BWT_Query* out);
 	vector<BWT_Builder::suffix_pair> suffix(const string& input);
 
-	//bool sort_suffixes(suffix_pair& left, suffix_pair& right);	
 	void printVector(vector<suffix_pair>& input);
+	vector<int> suffix_indices;
+	string appended;
 };
 
 class BWT_Query {
@@ -35,6 +36,16 @@ class BWT_Query {
 	/* return the location of any occurrence of the pattern in the input
 	*/
 	unsigned int first_occ(const std::string& pattern);
+
+	void make_count_table
+                (const std::string& string, std::vector<int>& 
+							suffix_indices);
+ private:
+   std::string bwt;
+   typedef pair <char,int> count_pair;
+   vector<BWT_Query::count_pair> lesser_char_counts;
+
+   friend class BWT_Builder;
 };
 
 

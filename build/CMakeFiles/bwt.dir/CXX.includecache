@@ -34,18 +34,6 @@ bitarray/bitarray.h
 wavarray/wat_array.h
 /home/admin/local/bwt/fm_index/wavarray/wat_array.h
 
-/home/admin/local/bwt/fm_index/main.cpp
-iostream
-/home/admin/local/bwt/fm_index/iostream
-vector
-/home/admin/local/bwt/fm_index/vector
-bitarray/bitarray.h
-/home/admin/local/bwt/fm_index/bitarray/bitarray.h
-wavarray/wat_array.h
-/home/admin/local/bwt/fm_index/wavarray/wat_array.h
-bwt.h
-/home/admin/local/bwt/fm_index/bwt.h
-
 /home/admin/local/mscds/bitarray/bitarray.h
 bitop.h
 /home/admin/local/mscds/bitarray/bitop.h

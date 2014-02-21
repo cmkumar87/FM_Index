@@ -29,4 +29,5 @@ int main(){
 	BWT_Query bq;
 	BWT_Builder bd;
 	bd.build(input, &bq);
+	bq.make_count_table(bd.appended, bd.suffix_indices);
 }

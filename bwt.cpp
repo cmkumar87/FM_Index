@@ -21,38 +21,41 @@ void BWT_Builder::build(const std::string& input, OutArchive& out){
 
 void BWT_Builder::build(const std::string& input, BWT_Query *out){
 
-	vector<string> bwt;
-
+	out->bwt.clear();
 	cout << "Input string: " << input << endl;
 
 	//Append end of string char
-	string appended = input + "$";
+	BWT_Builder::appended = input + "$";
 	cout << "Appended with $: " << appended << endl;
-	//count << "Original length:" << input.length();
-	//count << "Appended string length:" << appended.length();
 
 	vector<BWT_Builder::suffix_pair> suffixes = suffix(appended);
 
 	
 	//sort the suffixes using custom sort predicate
-	sort(suffixes.begin(),suffixes.end(),
+	sort(suffixes.begin(), suffixes.end(),
 		[](const pair<int,string> &left, const pair<int,string> &right)->bool{
 			return left.second < right.second;
 		});		
 
 	
-	cout << "Sorted Suffixes:" <<endl;
+	cout << "Sorted Suffixes:" << endl;
 	printVector(suffixes);
 
-	for (int index = 0; index < appended.length(); ++index){
-		suffix_pair p = suffixes[index];
-		if( p.first == 0 )
-			cout << "$" << endl;
-		else
-			cout<< appended[p.first - 1]<< endl;
+	//Extract just the suffix indices from the sorted suffix strings
+	transform(suffixes.begin(), suffixes.end(), back_inserter(BWT_Builder::suffix_indices), [](const suffix_pair&p){return p.first;});
 
-		 	//bwt.push_back(appended[p.first - 1]);
+	// Create bwt from sorted suffix indices
+	for (vector<int>::iterator iter = BWT_Builder::suffix_indices.begin();
+		iter != BWT_Builder::suffix_indices.end(); ++iter ){
+
+		if( *iter == 0 ) {
+			out->bwt.push_back('$');
+		}
+		else {
+		 	out->bwt.push_back(appended[*iter - 1]);
+		}
 	}
+	cout << out->bwt << endl;
 
 }
 
@@ -75,12 +78,6 @@ vector<BWT_Builder::suffix_pair>
 	return suffixes;
 }
 
-/*
-bool BWT_Builder::sort_suffixes( suffix_pair& left, 
-				  suffix_pair& right){
-	return left.second < right.second;
-}
-*/
 
 void BWT_Builder::printVector(vector<BWT_Builder::suffix_pair>& input){
        for (vector<suffix_pair>::iterator iter = input.begin();
@@ -94,8 +91,55 @@ void BWT_Builder::printVector(vector<BWT_Builder::suffix_pair>& input){
 
 }
 
+
+void BWT_Query::make_count_table
+		(const std::string& input, std::vector<int>& suff_ind){
+	char last_seen_char =' ';
+	int last_seen_char_count = 0;
+
+
+	for(vector<int>::iterator iter = suff_ind.begin(); 
+					iter != suff_ind.end(); ++iter ){
+		if(last_seen_char != input[*iter] ){
+			BWT_Query::lesser_char_counts.push_back
+	 		  (count_pair(input[*iter], last_seen_char_count));
+			last_seen_char = input[*iter];
+
+			cout << "Char:Count " << last_seen_char;
+			cout << last_seen_char_count << endl;
+		}
+		last_seen_char_count++;
+	}
+}
+
+
+// returns number of occurances of character c in BWT of 
+// string [1,k]
+unsigned int Occ(const char c&, int prefix_end_index){
+	
+}
+
 // count the number of times the pattern occur in the input
 unsigned int BWT_Query::count(const std::string& pattern){
+	/*Start the search from the last character of the pattern
+	  c is initialised to character from pattern 
+	*/
+	char c = pattern.back();
+	int phase = pattern.length();
+	int range_start = BWT_Query::lesser_char_counts[c]+1;
+	int range_end = BWT_Query::lesser_char_counts[c+1]
+
+	while( (range_start <= range_end) && (phase >= 2) ){
+		c= pattern[phase - 1];
+		range_start = lesser_char_counts[c]
+				+ Occ(c,range_start-1)+1;
+		range_end = lesser_char_counts[c]
+				+ Occ(c,range_end);
+		phase--;
+	}
+
+	return (range_end-range_start+1);
+
 }
 
 // return the location of any occurrence of the pattern in the input
