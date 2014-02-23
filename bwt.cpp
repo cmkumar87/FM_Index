@@ -1,6 +1,7 @@
 #include "iostream"
 #include "vector"
 #include "algorithm"
+#include "map"
 
 //include headers from local libraries
 
@@ -55,7 +56,8 @@ void BWT_Builder::build(const std::string& input, BWT_Query *out){
 		 	out->bwt.push_back(appended[*iter - 1]);
 		}
 	}
-	cout << out->bwt << endl;
+	cout << "---------"<< endl;
+	cout << "BWT Transform: " << out->bwt << endl;
 
 }
 
@@ -94,40 +96,60 @@ void BWT_Builder::printVector(vector<BWT_Builder::suffix_pair>& input){
 
 void BWT_Query::make_count_table
 		(const std::string& input, std::vector<int>& suff_ind){
+	
+	// Build C table
 	char last_seen_char =' ';
 	int last_seen_char_count = 0;
 
+	cout << "Char-Count table" << endl;
+	cout << "---------------"<< endl;
+   for(vector<int>::iterator iter = suff_ind.begin(); 
+				iter != suff_ind.end(); ++iter ){
+	if(last_seen_char != input[*iter] ){
+		lesser_char_counts[input[*iter]]=
+				 last_seen_char_count;
+		last_seen_char = input[*iter];
 
-	for(vector<int>::iterator iter = suff_ind.begin(); 
-					iter != suff_ind.end(); ++iter ){
-		if(last_seen_char != input[*iter] ){
-			BWT_Query::lesser_char_counts.push_back
-	 		  (count_pair(input[*iter], last_seen_char_count));
-			last_seen_char = input[*iter];
+		cout << last_seen_char <<" ";
+		cout << last_seen_char_count << endl;
 
-			cout << "Char:Count " << last_seen_char;
-			cout << last_seen_char_count << endl;
-		}
-		last_seen_char_count++;
+	// Build Occ table
+	for(unsigned int index_k = 0; index_k < bwt.length();
+						++index_k){
+		string bwt_sub = bwt.substr(0,index_k+1);
+		occtable[input[*iter]][index_k] = std::count(bwt_sub.begin(),
+						bwt_sub.end(),input[*iter] );
+	//	cout << "occ("<< input[*iter] <<",0,"<< index_k << ") "<< 
+	//				occtable[input[*iter]][index_k] << endl;
+	   }
 	}
-}
 
-
-// returns number of occurances of character c in BWT of 
-// string [1,k]
-unsigned int Occ(const char c&, int prefix_end_index){
+	last_seen_char_count++;
+	}
 	
 }
 
-// count the number of times the pattern occur in the input
+
+/* returns number of occurances of character c in BWT of 
+   string [1,k]
+*/
+unsigned int BWT_Query::Occ(char c, int prefix_end_index){
+	return occtable[c][prefix_end_index];
+}
+
+
+/* count the number of times the pattern occur in the input
+*/
 unsigned int BWT_Query::count(const std::string& pattern){
-	/*Start the search from the last character of the pattern
-	  c is initialised to character from pattern 
-	*/
+	
+	//Start the search from the last character of the pattern
+	// c is initialised to character from pattern 
 	char c = pattern.back();
+
 	int phase = pattern.length();
-	int range_start = BWT_Query::lesser_char_counts[c]+1;
-	int range_end = BWT_Query::lesser_char_counts[c+1]
+	int range_start = lesser_char_counts[c];
+	range_start+=1;
+	int range_end = lesser_char_counts[c+1];
 
 	while( (range_start <= range_end) && (phase >= 2) ){
 		c= pattern[phase - 1];
@@ -138,7 +160,10 @@ unsigned int BWT_Query::count(const std::string& pattern){
 		phase--;
 	}
 
-	return (range_end-range_start+1);
+	if (range_end < range_start )
+		return NOTFOUND;
+	else
+		return (range_end-range_start+1);
 
 }
 

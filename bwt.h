@@ -1,5 +1,6 @@
 #include "iostream"
 #include "vector"
+#include "map"
 
 //include local libraries
 #include "framework/archive.h"
@@ -40,10 +41,17 @@ class BWT_Query {
 	void make_count_table
                 (const std::string& string, std::vector<int>& 
 							suffix_indices);
+	unsigned int Occ(char c, int prefix_end_index);
+
  private:
    std::string bwt;
-   typedef pair <char,int> count_pair;
-   vector<BWT_Query::count_pair> lesser_char_counts;
+
+   typedef std::map <char,int> char_count_map;
+   char_count_map lesser_char_counts;
+
+   typedef std::map <unsigned int,unsigned int> countmap;
+   typedef std::map <char, countmap> table;
+   table occtable;
 
    friend class BWT_Builder;
 };

@@ -24,10 +24,16 @@ int main(){
 */
 	// Stub input. Will read input from Bed file later
 	//string input ="mississippi";
-	string input = "abaaba";
+	string input = "abracadabra";
 
 	BWT_Query bq;
 	BWT_Builder bd;
 	bd.build(input, &bq);
 	bq.make_count_table(bd.appended, bd.suffix_indices);
+	cout << "Example Occ calls"<< endl;
+	cout << "------------------------"<< endl;
+	cout << "Occ(a,1,2): " << bq.Occ('a',2)<< endl;
+	cout << "Occ(b,1,3): " << bq.Occ('b',3)<< endl;
+	cout << "Occ(r,1,4): " << bq.Occ('r',4)<< endl;
+	cout << "Occ(d,1,5): " << bq.Occ('d',5)<< endl;
 }
