@@ -53,6 +53,8 @@ class BWT_Query {
    typedef std::map <char, countmap> table;
    table occtable;
 
+   typedef char_count_map::iterator cIter;
+
    friend class BWT_Builder;
 };
 

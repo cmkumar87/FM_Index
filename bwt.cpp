@@ -101,7 +101,7 @@ void BWT_Query::make_count_table
 	char last_seen_char =' ';
 	int last_seen_char_count = 0;
 
-	cout << "Char-Count table" << endl;
+	cout << "Char-Count & Occ tables" << endl;
 	cout << "---------------"<< endl;
    for(vector<int>::iterator iter = suff_ind.begin(); 
 				iter != suff_ind.end(); ++iter ){
@@ -146,17 +146,25 @@ unsigned int BWT_Query::count(const std::string& pattern){
 	// c is initialised to character from pattern 
 	char c = pattern.back();
 
-	int phase = pattern.length();
-	int range_start = lesser_char_counts[c];
-	range_start+=1;
-	int range_end = lesser_char_counts[c+1];
+	int phase = pattern.length()-1;
+
+	BWT_Query::cIter iter = lesser_char_counts.find(c);
+	int range_start = iter->second +1;
+
+	iter++;
+	int range_end =  iter->second;
+
+	cout<< range_start << "|" << range_end <<  "|" 
+					<< phase <<"|"<< c << endl;
 
 	while( (range_start <= range_end) && (phase >= 2) ){
 		c= pattern[phase - 1];
 		range_start = lesser_char_counts[c]
-				+ Occ(c,range_start-1)+1;
+				+ Occ(c,range_start-2)+1;
 		range_end = lesser_char_counts[c]
-				+ Occ(c,range_end);
+				+ Occ(c,range_end-1);
+		cout<< range_start << "|" << range_end << "|" 
+					<< phase << "|" << c << endl;
 		phase--;
 	}
 
