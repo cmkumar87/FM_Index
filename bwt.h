@@ -28,19 +28,18 @@ class BWT_Query {
  public:
 	static const uint64_t NOTFOUND = 0xFFFFFFFFFFFFFFFFULL;
 	
+	std::pair<int,int> findRange(const std::string& pattern, bool debug);
 
 	/* count the number of times the pattern occur in the input
 	*/
-	unsigned int count(const std::string& pattern);
+	uint64_t count(const std::string& pattern);
 
 
-	/* return the location of any occurrence of the pattern in the input
-	*/
-	unsigned int first_occ(const std::string& pattern);
+	/* return the location of any occurrence of the pattern in the input */
+	uint64_t locate(const std::string& pattern, std::vector<int>);
 
 	void make_count_table
-                (const std::string& string, std::vector<int>& 
-							suffix_indices);
+                (const std::string& string, std::vector<int>& suffix_indices);
 	unsigned int Occ(char c, int prefix_end_index);
 
  private:
