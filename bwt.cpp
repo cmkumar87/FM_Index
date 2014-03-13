@@ -15,17 +15,6 @@
 
 using namespace mscds;
 
-typedef WatQueryGen<RRR> WavQuery2;
-typedef WatBuilderGen<RRR> WavBuilder2;
-
-
-typedef WatQueryGen<RRR2> WavQuery4;
-typedef WatBuilderGen<RRR2> WavBuilder4;
-
-typedef WatQueryGen<SDRankSelectSml> WavQuery3;
-typedef WatBuilderGen<SDRankSelectSml> WavBuilder3;
-
-
 using namespace std;
 
 
@@ -35,14 +24,14 @@ void BWT_Builder::build(const std::string& input, OutArchive& out){
 }
 */
 
-void BWT_Builder::build(const std::string& input, BWT_Query *out){
+void BWT_Builder::build(const std::string& input, BWT_Query *out, bool debug){
 
 	out->bwt.clear();
-	cout << "Input string: " << input << endl;
+	//cout << "Input string: " << input << endl;
 
 	//Append end of string char
 	BWT_Builder::appended = input + "$";
-	cout << "Appended with $: " << appended << endl;
+	if (debug) { cout << "Appended with $: " << appended << endl; }
 
 	vector<BWT_Builder::suffix_pair> suffixes = suffix(appended);
 	
@@ -53,8 +42,11 @@ void BWT_Builder::build(const std::string& input, BWT_Query *out){
 	   );		
 
 	
-	cout << "Sorted Suffixes:" << endl;
-	printVector(suffixes);
+	if(debug){
+		cout << "Sorted Suffixes:" << endl;
+		printVector(suffixes);
+	        cout << "---------"<< endl;
+	}
 
 	//Extract just the suffix indices from the sorted suffix strings
 	transform(suffixes.begin(), suffixes.end(), back_inserter(BWT_Builder::suffix_indices), 
@@ -71,9 +63,8 @@ void BWT_Builder::build(const std::string& input, BWT_Query *out){
 		 	out->bwt.push_back(appended[*iter - 1]);
 		}
 	}
-	cout << "---------"<< endl;
-	cout << "BWT Transform: " << out->bwt << endl;
-
+	
+	if (debug) { cout << "BWT Transform: " << out->bwt << endl; }
 }
 
 
@@ -90,7 +81,7 @@ vector<BWT_Builder::suffix_pair>
 	   suffixes.push_back(suffix_pair(index,input.substr(index)));
 	}
 
-	printVector(suffixes);
+	//printVector(suffixes);
 
 	return suffixes;
 }
@@ -105,43 +96,48 @@ void BWT_Builder::printVector(vector<BWT_Builder::suffix_pair>& input){
 	    string suffix =(*iter).second;
 	    cout << suffix << endl;
         }  
-
 }
 
 
 void BWT_Query::make_count_table
-		(const std::string& input, std::vector<int>& suff_ind){
+		(const std::string& input, std::vector<int>& suff_ind, bool debug){
 	
 	// Build C table
 	char last_seen_char =' ';
 	int last_seen_char_count = 0;
 
-	cout << "Char-Count & Occ tables" << endl;
-	cout << "---------------"<< endl;
+	if (debug){
+		cout << "Char-Count & Occ tables" << endl;
+		cout << "---------------"<< endl;
+	}
+
    for(vector<int>::iterator iter = suff_ind.begin(); 
 				iter != suff_ind.end(); ++iter ){
 	if(last_seen_char != input[*iter] ){
 		lesser_char_counts[input[*iter]]=
 				 last_seen_char_count;
 		last_seen_char = input[*iter];
-
-		cout << last_seen_char <<" ";
-		cout << last_seen_char_count << endl;
+		if (debug){
+			cout << last_seen_char <<" ";
+			cout << last_seen_char_count << endl;
+		}
 
 	// Build Occ table
-	for(unsigned int index_k = 0; index_k < bwt.length();
+	for(unsigned int index_k = 1; index_k <= bwt.length();
 						++index_k){
-		string bwt_sub = bwt.substr(0,index_k+1);
+		string bwt_sub = bwt.substr(0,index_k);
 		occtable[input[*iter]][index_k] = std::count(bwt_sub.begin(),
 						bwt_sub.end(),input[*iter] );
-	//	cout << "occ("<< input[*iter] <<",0,"<< index_k << ") "<< 
-	//				occtable[input[*iter]][index_k] << endl;
+		if(debug){
+			cout << bwt_sub << endl;
+			cout << "occ("<< input[*iter] <<",1,"<< index_k << ") "<< 
+					occtable[input[*iter]][index_k] << endl;
+		}
 	   }
 	}
 
 	 last_seen_char_count++;
-	}
-	
+	}	
 }
 
 
@@ -155,9 +151,9 @@ unsigned int BWT_Query::Occ(char c, int prefix_end_index){
 
 /* count the number of times the pattern occur in the input
 */
-uint64_t BWT_Query::count(const std::string& pattern){
+uint64_t BWT_Query::count(const std::string& pattern, bool debug){
 	
-	std::pair<int,int> range = findRange(pattern,true);
+	std::pair<int,int> range = findRange(pattern,debug);
 	int range_end = range.second;
 	int range_start = range.first;
 	
@@ -167,20 +163,21 @@ uint64_t BWT_Query::count(const std::string& pattern){
 		return (range_end-range_start+1);
 }
 
+
 std::pair<int,int> BWT_Query::findRange(const std::string& pattern, bool debug){
 
 	// initialised to index of last character in pattern
-        int phase = pattern.length()-1;
-        int range_start = 0;
-        int range_end = bwt.length()-1;
+        int phase = pattern.length();
+        int range_start = 1;
+        int range_end = bwt.length();
         
         // Start the search from the last character of the pattern
-        while( (range_start <= range_end) && (phase >= 0) ){
-                char c= pattern[phase];
+        while( (range_start <= range_end) && (phase >= 1) ){
+                char c= pattern[phase-1];
                 range_start = lesser_char_counts[c]
-                                + Occ(c,range_start-2)+1;
+                                + Occ(c,range_start-1)+1;
                 range_end = lesser_char_counts[c]
-                                + Occ(c,range_end-1);
+                                + Occ(c,range_end);
 		if( debug ){
 	          cout<<"Start_Ptr "<< range_start << "|" << "End_ptr " <<
         	   range_end << "|"<< "Iteration " << phase << "|" << c << endl;
@@ -192,35 +189,57 @@ std::pair<int,int> BWT_Query::findRange(const std::string& pattern, bool debug){
 }
 
 
-// return the location of any occurrence of the pattern in the input
-uint64_t BWT_Query::locate(const std::string& pattern, 
-				std::vector<int> suff_ind){
-	uint64_t first_hit = -1;
-	std::pair<int,int> range = findRange(pattern, false);
+// Return the location of any occurrence of the pattern in the input
+vector<uint64_t> BWT_Query::locate(const std::string& pattern, 
+				std::vector<int>& suff_ind, bool debug){
+	uint64_t firstHit = -1;
+	vector<uint64_t> allHits;
+	
+	std::pair<int,int> range = findRange(pattern,debug);
 
 	if(range.second < range.first )
-		return NOTFOUND;
-		
+		{ allHits.push_back(0xFFFFFFFFFFFFFFFFULL); return allHits; }
+
 	for(unsigned int i = range.first; i <= range.second; i++){
-		if (first_hit != -1){
-			first_hit= suff_ind[i-1];
+		if (firstHit == -1){
+			firstHit= suff_ind[i-1];
 		}
-		cout<< "Pattern found at Offset: " << suff_ind[i-1] << endl;
+		allHits.push_back(suff_ind[i-1]);
+		if(debug){ cout<< "Locate pattern found at Offset: " <<  suff_ind[i-1]  << endl;}
 	}
-	return first_hit;
+
+	return allHits;
 }
 
 
-/*
-	BitArray b = BitArrayBuilder::create(4);
-	b.setbit(0, true);
+// Return the location of any occurrence of the pattern in the input
+vector<uint64_t> BWT_Query::locate2(const std::string& pattern,
+                                std::vector<int>& suff_ind_small, bool debug){
+	//TODO parametrise First Hit
+	uint64_t first_hit = -1;
+	vector<uint64_t> allHits;
 
+        std::pair<int,int> range = findRange(pattern, debug);
+
+        if(range.second < range.first )
+                { allHits.push_back(0xFFFFFFFFFFFFFFFFULL); return allHits; }
+
+        for(unsigned int i = range.first; i <= range.second; i++){
+                unsigned int v = 0, j = i;
+                char c = bwt[j-1];
+	        while ( j%2 !=0 ){
+	                //cout << "j:v value: " << c << " " << j << ":" << v << endl;
+                        j = lesser_char_counts[c] + Occ(c,j);
+			c = bwt[j-1];
+			v++;
+		}
+               	if (first_hit == -1){
+			first_hit= suff_ind_small[j-1]+v;
+		}
 	
-	vector<uint64_t> v(10,5);
-	cout << "Created vector of size:" << v.size() << endl;
-
-	for (long index = 0; index < 3; index ++){
-		cout << "Vector element " << index << v.at(index) << endl;
-	}
-*/
-
+                //cout << "j:v value: " << c << " " << j << ":" << v << endl;
+		allHits.push_back(suff_ind_small[j-1]+v);
+		if(debug){ cout << "Locate2: Pattern found at Offset: " << suff_ind_small[j-1]+v << endl; }
+        }
+        return allHits;
+}
