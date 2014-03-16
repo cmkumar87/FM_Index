@@ -44,9 +44,6 @@ class BWT_Query {
                 (const std::string& string, std::vector<int>& suffix_indices, bool debug);
 	unsigned int Occ(char c, int prefix_end_index);
 
- private:
-   std::string bwt;
-
    typedef std::map <char,int> char_count_map;
    char_count_map lesser_char_counts;
 
@@ -55,6 +52,10 @@ class BWT_Query {
    table occtable;
 
    typedef char_count_map::iterator cIter;
+
+
+ private:
+   std::string bwt;
 
    friend class BWT_Builder;
 };

@@ -67,7 +67,6 @@ void BWT_Builder::build(const std::string& input, BWT_Query *out, bool debug){
 	if (debug) { cout << "BWT Transform: " << out->bwt << endl; }
 }
 
-
 /*
   Finds all the suffixes for the string.
   Returns suffixes with their indices.
@@ -137,7 +136,7 @@ void BWT_Query::make_count_table
 	}
 
 	 last_seen_char_count++;
-	}	
+  }	
 }
 
 
@@ -205,7 +204,7 @@ vector<uint64_t> BWT_Query::locate(const std::string& pattern,
 			firstHit= suff_ind[i-1];
 		}
 		allHits.push_back(suff_ind[i-1]);
-		if(debug){ cout<< "Locate pattern found at Offset: " <<  suff_ind[i-1]  << endl;}
+		if(debug){ cout<< "Locate pattern found at Offset: " << suff_ind[i-1] << endl;}
 	}
 
 	return allHits;
@@ -227,7 +226,7 @@ vector<uint64_t> BWT_Query::locate2(const std::string& pattern,
         for(unsigned int i = range.first; i <= range.second; i++){
                 unsigned int v = 0, j = i;
                 char c = bwt[j-1];
-	        while ( j%2 !=0 ){
+	        while ( j%32 !=0 ){
 	                //cout << "j:v value: " << c << " " << j << ":" << v << endl;
                         j = lesser_char_counts[c] + Occ(c,j);
 			c = bwt[j-1];
