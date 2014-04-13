@@ -1,3 +1,9 @@
+/*
+	FM-Index: an index enable fast search of long compressed strings without uncompressing the strings.
+	Author: Muthukumar Chandrasekaran
+	Contact: http://wing.comp.nus.edu.sg/~cmkumar/
+*/
+
 #include "iostream"
 #include "vector"
 #include "algorithm"
