@@ -1,0 +1,1 @@
+# This is a C++ library for fm_index that allows gene sequences to be indexed and searched without decompression. Due to data size gene sequences need to be compressed before storage. Yet they also must allow to be searched for patterns#
